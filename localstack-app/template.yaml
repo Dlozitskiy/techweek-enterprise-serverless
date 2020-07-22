@@ -1,0 +1,35 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Example of uploading API Gateway event payload into S3 file
+Globals:
+  Function:
+    Environment:
+      Variables:
+        S3_ENDPOINT_OVERRIDE: ""
+        AWS_BUCKET_NAME: !Ref S3Bucket
+Resources:
+  S3UploadFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      Runtime: nodejs12.x
+      CodeUri: s3-upload-function/
+      Tracing: Active
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref S3Bucket
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /upload
+            Method: post
+  S3Bucket:
+    Type: AWS::S3::Bucket
+Metadata:
+  Cloudguard:
+    Account:
+      Tags:
+        BuildEnv: SamOnlyGlobalExample
+    Globals:
+      DefaultFailThreshold: Low

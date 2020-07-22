@@ -1,0 +1,74 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Example of processing messages on an SQS queue with Lambda
+Parameters:
+  EpsagonToken:
+    Type: String
+  AppName:
+    Type: String
+Globals:
+  Function:
+    Environment:
+      Variables:
+        SQSMessageTable: !Ref SQSMessageTable
+        Queue: !Ref SQSQueue
+        EpsagonToken: !Ref EpsagonToken
+        AppName: !Ref AppName
+Resources:
+  ApiGatewayApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      TracingEnabled: true
+  SQSConsumeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      Runtime: nodejs12.x
+      CodeUri: sqs-consume-function/
+      Tracing: Active
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref SQSMessageTable
+      Events:
+        SQSEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt SQSQueue.Arn
+            BatchSize: 10
+  SQSProduceFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      Runtime: nodejs12.x
+      CodeUri: sqs-produce-function/
+      Tracing: Active
+      Policies:
+        - SQSSendMessagePolicy:
+            QueueName: !GetAtt SQSQueue.QueueName
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: "/memo"
+            Method: post
+            RestApiId:
+              Ref: ApiGatewayApi
+  SQSMessageTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: "id"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "id"
+          KeyType: "HASH"
+      BillingMode: "PAY_PER_REQUEST"
+  SQSQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt SQSDeadLettterQueue.Arn
+        maxReceiveCount: 1
+  SQSDeadLettterQueue:
+    Type: AWS::SQS::Queue

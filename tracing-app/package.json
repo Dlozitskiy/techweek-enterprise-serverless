@@ -1,0 +1,16 @@
+{
+  "name": "tracing-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --coverage"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "aws-sdk": "^2.721.0",
+    "jest": "^26.1.0",
+    "jest-html-reporter": "^3.1.3"
+  }
+}

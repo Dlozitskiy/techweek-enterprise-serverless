@@ -1,0 +1,19 @@
+{
+  "name": "sqs-produce-function",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-xray-sdk-core": "^3.1.0",
+    "epsagon": "^1.77.0"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.720.0",
+    "jest": "^26.1.0"
+  }
+}
